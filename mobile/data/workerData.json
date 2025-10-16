@@ -1,0 +1,285 @@
+{
+  "currentWorker": {
+    "id": 1,
+    "name": "Rajesh Kumar",
+    "level": 12,
+    "currentXP": 2450,
+    "xpToNextLevel": 3000,
+    "totalBadges": 8,
+    "rank": 2,
+    "avatar": "RK"
+  },
+  "badges": [
+    {
+      "id": "precision_pro",
+      "name": "Precision Pro",
+      "description": "Complete 50 tasks with 95%+ accuracy",
+      "icon": "target",
+      "color": "#4caf50",
+      "earned": true,
+      "earnedDate": "2025-09-15",
+      "progress": 50,
+      "target": 50
+    },
+    {
+      "id": "team_player",
+      "name": "Team Player",
+      "description": "Help 20 team members",
+      "icon": "account-group",
+      "color": "#2196f3",
+      "earned": true,
+      "earnedDate": "2025-09-20",
+      "progress": 20,
+      "target": 20
+    },
+    {
+      "id": "safety_star",
+      "name": "Safety Star",
+      "description": "100 days without safety incidents",
+      "icon": "shield-check",
+      "color": "#ff9800",
+      "earned": true,
+      "earnedDate": "2025-10-01",
+      "progress": 100,
+      "target": 100
+    },
+    {
+      "id": "learning_legend",
+      "name": "Learning Legend",
+      "description": "Complete 10 training courses",
+      "icon": "school",
+      "color": "#9c27b0",
+      "earned": true,
+      "earnedDate": "2025-10-05",
+      "progress": 10,
+      "target": 10
+    },
+    {
+      "id": "speed_demon",
+      "name": "Speed Demon",
+      "description": "Complete 30 tasks ahead of schedule",
+      "icon": "lightning-bolt",
+      "color": "#f44336",
+      "earned": true,
+      "earnedDate": "2025-10-10",
+      "progress": 30,
+      "target": 30
+    },
+    {
+      "id": "attendance_ace",
+      "name": "Attendance Ace",
+      "description": "Perfect attendance for 3 months",
+      "icon": "calendar-check",
+      "color": "#00bcd4",
+      "earned": true,
+      "earnedDate": "2025-10-12",
+      "progress": 90,
+      "target": 90
+    },
+    {
+      "id": "quality_champion",
+      "name": "Quality Champion",
+      "description": "Maintain 98%+ quality score for 1 month",
+      "icon": "star",
+      "color": "#ffc107",
+      "earned": true,
+      "earnedDate": "2025-10-14",
+      "progress": 30,
+      "target": 30
+    },
+    {
+      "id": "mentor_master",
+      "name": "Mentor Master",
+      "description": "Train 5 new workers",
+      "icon": "teach",
+      "color": "#673ab7",
+      "earned": true,
+      "earnedDate": "2025-10-15",
+      "progress": 5,
+      "target": 5
+    },
+    {
+      "id": "innovation_guru",
+      "name": "Innovation Guru",
+      "description": "Suggest 10 process improvements",
+      "icon": "lightbulb",
+      "color": "#ff5722",
+      "earned": false,
+      "progress": 7,
+      "target": 10
+    },
+    {
+      "id": "efficiency_expert",
+      "name": "Efficiency Expert",
+      "description": "Reduce task time by 20% consistently",
+      "icon": "speedometer",
+      "color": "#3f51b5",
+      "earned": false,
+      "progress": 15,
+      "target": 20
+    },
+    {
+      "id": "perfect_week",
+      "name": "Perfect Week",
+      "description": "Complete all tasks perfectly for a week",
+      "icon": "trophy",
+      "color": "#cddc39",
+      "earned": false,
+      "progress": 4,
+      "target": 7
+    },
+    {
+      "id": "early_bird",
+      "name": "Early Bird",
+      "description": "Arrive 15 minutes early for 30 days",
+      "icon": "alarm",
+      "color": "#009688",
+      "earned": false,
+      "progress": 22,
+      "target": 30
+    }
+  ],
+  "leaderboard": [
+    {
+      "id": 2,
+      "name": "Priya Sharma",
+      "level": 15,
+      "xp": 3850,
+      "avatar": "PS",
+      "rank": 1,
+      "badges": 12
+    },
+    {
+      "id": 1,
+      "name": "Rajesh Kumar",
+      "level": 12,
+      "xp": 2450,
+      "avatar": "RK",
+      "rank": 2,
+      "badges": 8,
+      "isCurrentUser": true
+    },
+    {
+      "id": 5,
+      "name": "Sunita Reddy",
+      "level": 11,
+      "xp": 2200,
+      "avatar": "SR",
+      "rank": 3,
+      "badges": 9
+    },
+    {
+      "id": 8,
+      "name": "Vikram Singh",
+      "level": 10,
+      "xp": 1950,
+      "avatar": "VS",
+      "rank": 4,
+      "badges": 7
+    },
+    {
+      "id": 12,
+      "name": "Anjali Gupta",
+      "level": 9,
+      "xp": 1700,
+      "avatar": "AG",
+      "rank": 5,
+      "badges": 6
+    }
+  ],
+  "challenges": {
+    "daily": [
+      {
+        "id": "daily_1",
+        "title": "Complete 3 safety checks",
+        "description": "Perform safety inspections on 3 workstations",
+        "xpReward": 50,
+        "progress": 2,
+        "target": 3,
+        "type": "safety",
+        "expiresIn": "6 hours",
+        "icon": "shield-check"
+      },
+      {
+        "id": "daily_2",
+        "title": "Help a colleague",
+        "description": "Assist a team member with their task",
+        "xpReward": 30,
+        "progress": 0,
+        "target": 1,
+        "type": "teamwork",
+        "expiresIn": "8 hours",
+        "icon": "hand-heart"
+      },
+      {
+        "id": "daily_3",
+        "title": "Zero defects",
+        "description": "Complete all tasks with perfect quality",
+        "xpReward": 75,
+        "progress": 3,
+        "target": 5,
+        "type": "quality",
+        "expiresIn": "4 hours",
+        "icon": "check-circle"
+      }
+    ],
+    "weekly": [
+      {
+        "id": "weekly_1",
+        "title": "Master a new skill",
+        "description": "Complete a training module",
+        "xpReward": 200,
+        "progress": 0,
+        "target": 1,
+        "type": "learning",
+        "expiresIn": "3 days",
+        "icon": "school"
+      },
+      {
+        "id": "weekly_2",
+        "title": "Perfect attendance",
+        "description": "Don't miss a single day this week",
+        "xpReward": 150,
+        "progress": 4,
+        "target": 5,
+        "type": "attendance",
+        "expiresIn": "1 day",
+        "icon": "calendar-check"
+      },
+      {
+        "id": "weekly_3",
+        "title": "Speed champion",
+        "description": "Complete 10 tasks ahead of schedule",
+        "xpReward": 250,
+        "progress": 6,
+        "target": 10,
+        "type": "efficiency",
+        "expiresIn": "5 days",
+        "icon": "lightning-bolt"
+      }
+    ]
+  },
+  "recentActivities": [
+    {
+      "id": 1,
+      "type": "xp_gained",
+      "message": "Completed task with 98% accuracy",
+      "xp": 50,
+      "timestamp": "2 hours ago"
+    },
+    {
+      "id": 2,
+      "type": "badge_earned",
+      "message": "Earned 'Mentor Master' badge",
+      "badge": "Mentor Master",
+      "timestamp": "5 hours ago"
+    },
+    {
+      "id": 3,
+      "type": "level_up",
+      "message": "Reached Level 12!",
+      "level": 12,
+      "timestamp": "1 day ago"
+    }
+  ]
+}

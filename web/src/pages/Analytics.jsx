@@ -69,15 +69,21 @@ export default function Analytics() {
   }
 
   // Prepare chart data
-  const skillsChartData = Object.entries(analytics.skills_distribution || {}).map(([skill, count]) => ({
-    skill,
-    workers: count
-  }));
+  const skillsChartData = Object.entries(analytics.skills_distribution || {})
+    .map(([skill, count]) => ({
+      skill,
+      workers: count
+    }))
+    .sort((a, b) => b.workers - a.workers)
+    .slice(0, 10); // Show only top 10 skills
 
-  const hoursChartData = Object.entries(analytics.average_hours_per_week || {}).map(([id, data]) => ({
-    name: data.name,
-    hours: data.hours
-  }));
+  const hoursChartData = Object.entries(analytics.average_hours_per_week || {})
+    .map(([id, data]) => ({
+      name: data.name,
+      hours: data.hours
+    }))
+    .sort((a, b) => b.hours - a.hours)
+    .slice(0, 10); // Show only top 10 workers
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -137,20 +143,22 @@ export default function Analytics() {
         </Grid>
 
         {/* Skills Distribution Bar Chart */}
-        <Grid item xs={12}>
+        <Grid item xs={12} lg={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Workers Available per Skill
+                Top 10 Skills by Worker Availability
               </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={skillsChartData}>
+              <Typography variant="caption" color="textSecondary" gutterBottom display="block">
+                Most common skills across the workforce
+              </Typography>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={skillsChartData} layout="vertical" margin={{ left: 120 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="skill" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
+                  <XAxis type="number" />
+                  <YAxis type="category" dataKey="skill" width={110} />
                   <Tooltip />
-                  <Legend />
-                  <Bar dataKey="workers" fill="#1976d2" name="Number of Workers" />
+                  <Bar dataKey="workers" fill="#1976d2" name="Workers" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -158,27 +166,36 @@ export default function Analytics() {
         </Grid>
 
         {/* Hours Per Week Line Chart */}
-        <Grid item xs={12}>
+        <Grid item xs={12} lg={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Average Hours Worked Per Week
+                Top 10 Workers by Hours Worked
               </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={hoursChartData}>
+              <Typography variant="caption" color="textSecondary" gutterBottom display="block">
+                Workers approaching 48-52 hours/week are at high fatigue risk
+              </Typography>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={hoursChartData} layout="vertical" margin={{ left: 100 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                  <YAxis domain={[0, 52]} />
+                  <XAxis type="number" domain={[0, 55]} />
+                  <YAxis type="category" dataKey="name" width={90} />
                   <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="hours" stroke="#dc004e" strokeWidth={2} name="Hours/Week" />
-                  <Line type="monotone" dataKey={() => 48} stroke="#ff9800" strokeDasharray="5 5" name="Warning (48h)" />
-                  <Line type="monotone" dataKey={() => 52} stroke="#f44336" strokeDasharray="5 5" name="Max (52h)" />
-                </LineChart>
+                  <Bar dataKey="hours" fill="#dc004e" name="Hours/Week" radius={[0, 8, 8, 0]}>
+                    {hoursChartData.map((entry, index) => (
+                      <Bar 
+                        key={`bar-${index}`}
+                        fill={entry.hours >= 48 ? '#f44336' : entry.hours >= 40 ? '#ff9800' : '#4caf50'} 
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
-              <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-                * Workers approaching 48-52 hours/week are at high fatigue risk
-              </Typography>
+              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Chip label="< 40h: Normal" size="small" sx={{ bgcolor: '#4caf50', color: 'white' }} />
+                <Chip label="40-47h: Moderate" size="small" sx={{ bgcolor: '#ff9800', color: 'white' }} />
+                <Chip label="≥ 48h: High Risk" size="small" sx={{ bgcolor: '#f44336', color: 'white' }} />
+              </Box>
             </CardContent>
           </Card>
         </Grid>

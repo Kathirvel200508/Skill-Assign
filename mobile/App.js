@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import DashboardScreen from './screens/DashboardScreen';
-import WorkerManagementScreen from './screens/WorkerManagementScreen';
-import RoleManagementScreen from './screens/RoleManagementScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
+import GamificationScreen from './screens/GamificationScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,12 +19,12 @@ export default function App() {
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;
 
-              if (route.name === 'Dashboard') {
-                iconName = focused ? 'view-dashboard' : 'view-dashboard-outline';
-              } else if (route.name === 'Workers') {
-                iconName = focused ? 'account-group' : 'account-group-outline';
-              } else if (route.name === 'Roles') {
-                iconName = focused ? 'briefcase' : 'briefcase-outline';
+              if (route.name === 'Profile') {
+                iconName = focused ? 'account' : 'account-outline';
+              } else if (route.name === 'Notifications') {
+                iconName = focused ? 'bell' : 'bell-outline';
+              } else if (route.name === 'Gamification') {
+                iconName = focused ? 'trophy' : 'trophy-outline';
               }
 
               return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
@@ -41,19 +41,19 @@ export default function App() {
           })}
         >
           <Tab.Screen 
-            name="Dashboard" 
-            component={DashboardScreen}
-            options={{ title: 'Role Assignments' }}
+            name="Profile" 
+            component={ProfileScreen}
+            options={{ title: 'My Profile' }}
           />
           <Tab.Screen 
-            name="Workers" 
-            component={WorkerManagementScreen}
-            options={{ title: 'Worker Management' }}
+            name="Notifications" 
+            component={NotificationsScreen}
+            options={{ title: 'Task Notifications' }}
           />
           <Tab.Screen 
-            name="Roles" 
-            component={RoleManagementScreen}
-            options={{ title: 'Role Management' }}
+            name="Gamification" 
+            component={GamificationScreen}
+            options={{ title: 'Achievements' }}
           />
         </Tab.Navigator>
       </NavigationContainer>

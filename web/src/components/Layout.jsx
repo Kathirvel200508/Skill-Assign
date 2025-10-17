@@ -20,6 +20,7 @@ import {
   Work as WorkIcon,
   Assignment as AssignmentIcon,
   Analytics as AnalyticsIcon,
+  Task as TaskIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -29,6 +30,7 @@ const menuItems = [
   { text: 'Workers', icon: <PeopleIcon />, path: '/workers' },
   { text: 'Roles', icon: <WorkIcon />, path: '/roles' },
   { text: 'Assignments', icon: <AssignmentIcon />, path: '/assignments' },
+  { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
   { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
 ];
 

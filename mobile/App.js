@@ -7,6 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProfileScreen from './screens/ProfileScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
 import GamificationScreen from './screens/GamificationScreen';
+import TasksScreen from './screens/TasksScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,13 +20,15 @@ export default function App() {
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;
 
-              if (route.name === 'Profile') {
+              if (route.name === 'Tasks') {
+                iconName = focused ? 'clipboard-check' : 'clipboard-check-outline';
+              } else if (route.name === 'Profile') {
                 iconName = focused ? 'account' : 'account-outline';
               } else if (route.name === 'Notifications') {
                 iconName = focused ? 'bell' : 'bell-outline';
               } else if (route.name === 'Gamification') {
                 iconName = focused ? 'trophy' : 'trophy-outline';
-              }
+              } 
 
               return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
             },
@@ -40,6 +43,12 @@ export default function App() {
             },
           })}
         >
+          <Tab.Screen 
+            name="Tasks" 
+            component={TasksScreen}
+            options={{ title: 'My Tasks' }}
+            initialParams={{ workerId: 1 }}
+          />
           <Tab.Screen 
             name="Profile" 
             component={ProfileScreen}

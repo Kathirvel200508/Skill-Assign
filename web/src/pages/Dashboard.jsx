@@ -17,7 +17,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { roleAPI, predictionAPI, assignmentAPI, analyticsAPI } from '../api';
+import { roleAPI, predictionAPI, assignmentAPI, analyticsAPI, taskAPI } from '../api';
 
 export default function Dashboard() {
   const [roles, setRoles] = useState([]);
@@ -72,19 +72,50 @@ export default function Dashboard() {
     return 'success';
   };
 
-  const handleAssign = async (workerId, roleId, fitScore) => {
+  const handleAssign = async (workerId, roleId, fitScore, workerName, roleName) => {
     try {
+      console.log('[DASHBOARD] ======================================');
+      console.log('[DASHBOARD] ASSIGNING WORKER TO ROLE');
+      console.log('[DASHBOARD] ======================================');
+      console.log('[DASHBOARD] Worker:', workerName, '(ID:', workerId + ')');
+      console.log('[DASHBOARD] Role:', roleName, '(ID:', roleId + ')');
+      console.log('[DASHBOARD] Fit Score:', (fitScore * 100).toFixed(0) + '%');
+      
+      // Create assignment record
       await assignmentAPI.create({
         worker_id: workerId,
         role_id: roleId,
         fit_score: fitScore,
       });
-      alert('Worker assigned successfully!');
+      console.log('[DASHBOARD] ✅ Assignment created');
+      
+      // Create task for mobile app
+      const taskData = {
+        worker_id: workerId,
+        role_id: roleId,
+        title: `New Role Assignment: ${roleName}`,
+        description: `You have been assigned to the role of ${roleName}. Fit score: ${(fitScore * 100).toFixed(0)}%. Please check the role requirements and start your tasks.`,
+        priority: 'high',
+        assigned_by: 'Supervisor Dashboard (ML Recommendation)',
+      };
+      
+      console.log('[DASHBOARD] 📱 Creating task for mobile app...');
+      const taskResponse = await taskAPI.create(taskData);
+      console.log('[DASHBOARD] ✅ Task created! Task ID:', taskResponse.data.id);
+      console.log('[DASHBOARD] 🎉 Mobile app will show this task within 2 seconds!');
+      
+      alert(`✅ SUCCESS!\n\nWorker: ${workerName}\nRole: ${roleName}\nFit Score: ${(fitScore * 100).toFixed(0)}%\n\n📱 Task has been created in the mobile app!\n\nThe worker will see:\n- Role assignment notification\n- Task in their mobile app\n- Instructions to start`);
+      
       setDialogOpen(false);
       loadData();
+      
+      console.log('[DASHBOARD] ======================================');
+      console.log('[DASHBOARD] ASSIGNMENT COMPLETE!');
+      console.log('[DASHBOARD] Check mobile app for the new task!');
+      console.log('[DASHBOARD] ======================================');
     } catch (error) {
-      console.error('Error assigning worker:', error);
-      alert('Failed to assign worker');
+      console.error('[DASHBOARD] ❌ Error:', error);
+      alert('Failed to assign worker: ' + (error.response?.data?.detail || error.message));
     }
   };
 
@@ -264,7 +295,7 @@ export default function Dashboard() {
                       variant="contained"
                       size="small"
                       sx={{ mt: 2 }}
-                      onClick={() => handleAssign(rec.worker_id, selectedRole.id, rec.fit_score)}
+                      onClick={() => handleAssign(rec.worker_id, selectedRole.id, rec.fit_score, rec.worker_name, selectedRole.name)}
                     >
                       Assign to Role
                     </Button>

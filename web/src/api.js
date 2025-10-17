@@ -37,4 +37,11 @@ export const analyticsAPI = {
   getOverview: () => api.get('/analytics/overview'),
 };
 
+export const taskAPI = {
+  create: (data) => api.post('/task/create', data),
+  getAll: () => api.get('/task/all'),
+  getByWorker: (workerId) => api.get(`/task/worker/${workerId}`),
+  update: (id, data) => api.put(`/task/${id}`, data),
+};
+
 export default api;

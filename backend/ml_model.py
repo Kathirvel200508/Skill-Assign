@@ -98,38 +98,51 @@ class SkillAssignmentModel:
         
         return np.array(X), np.array(y)
     
-    def train(self, X: np.ndarray, y: np.ndarray) -> Dict:
+    def train(self, X: np.ndarray, y: np.ndarray, incremental: bool = False) -> Dict:
         """
-        Train the XGBoost model
+        Train the XGBoost model (supports incremental training)
         """
         if len(X) == 0:
             raise ValueError("No training data available")
         
-        # Split data
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        # Train XGBoost model
-        self.model = xgb.XGBRegressor(
-            n_estimators=100,
-            max_depth=5,
-            learning_rate=0.1,
-            random_state=42,
-            objective='reg:squarederror'
-        )
-        
-        self.model.fit(X_train, y_train)
-        
-        # Evaluate
-        y_pred = self.model.predict(X_test)
-        mse = mean_squared_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        
-        return {
-            'mse': float(mse),
-            'r2': float(r2),
-            'train_samples': len(X_train),
-            'test_samples': len(X_test)
-        }
+        if incremental and self.model is not None:
+            # Incremental training - warm start with existing model
+            print("[ML] Incremental training with new data...")
+            self.model.fit(X, y, xgb_model=self.model.get_booster())
+            
+            return {
+                'mode': 'incremental',
+                'new_samples': len(X),
+                'message': 'Model updated with new data'
+            }
+        else:
+            # Full training
+            print("[ML] Full model training...")
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            
+            # Train XGBoost model
+            self.model = xgb.XGBRegressor(
+                n_estimators=100,
+                max_depth=5,
+                learning_rate=0.1,
+                random_state=42,
+                objective='reg:squarederror'
+            )
+            
+            self.model.fit(X_train, y_train)
+            
+            # Evaluate
+            y_pred = self.model.predict(X_test)
+            mse = mean_squared_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
+            
+            return {
+                'mode': 'full',
+                'mse': float(mse),
+                'r2': float(r2),
+                'train_samples': len(X_train),
+                'test_samples': len(X_test)
+            }
     
     def predict(self, worker_data: dict, role_data: dict) -> Tuple[float, float]:
         """

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Backend Connection from Web Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .error { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Web Dashboard Backend Connection Test</h1>
+    
+    <div class="test">
+        <h2>1. Test Backend Connection</h2>
+        <button onclick="testBackend()">Test</button>
+        <div id="backend-result" class="result"></div>
+    </div>
+
+    <div class="test">
+        <h2>2. Create Task (Same as Supervisor Dashboard)</h2>
+        <button onclick="createTaskLikeDashboard()">Create Task</button>
+        <div id="task-result" class="result"></div>
+    </div>
+
+    <div class="test">
+        <h2>3. Verify Task Created</h2>
+        <button onclick="verifyTask()">Check Tasks</button>
+        <div id="verify-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        async function testBackend() {
+            const result = document.getElementById('backend-result');
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                result.className = 'result success';
+                result.textContent = `✓ Backend is accessible from web dashboard!\nStatus: ${data.status}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Cannot reach backend!\n${error.message}\n\nThis is why supervisor dashboard can't assign tasks!`;
+            }
+        }
+
+        async function createTaskLikeDashboard() {
+            const result = document.getElementById('task-result');
+            result.textContent = 'Creating task exactly like supervisor dashboard...';
+            
+            // Exact same format as supervisor dashboard
+            const taskData = {
+                worker_id: 1, // Rajesh Kumar
+                role_id: null,
+                title: `Test from Dashboard - ${new Date().toLocaleTimeString()}`,
+                description: 'Testing if supervisor dashboard can create tasks',
+                priority: 'high',
+                due_date: null,
+                assigned_by: 'Supervisor Dashboard'
+            };
+            
+            try {
+                console.log('[Test] Creating task...', taskData);
+                
+                const response = await fetch(`${API_URL}/task/create`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(taskData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+                
+                const task = await response.json();
+                result.className = 'result success';
+                result.textContent = `✓ Task created successfully!\n\n` +
+                    `Task ID: ${task.id}\n` +
+                    `Title: ${task.title}\n` +
+                    `Worker: ${task.worker_id} (Rajesh Kumar)\n` +
+                    `Status: ${task.status}\n\n` +
+                    `This proves the backend works!\n` +
+                    `If supervisor dashboard doesn't work, it's a frontend issue.`;
+                    
+                console.log('[Test] Task created:', task);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Failed to create task!\n\n${error.message}\n\n` +
+                    `This is the same error supervisor dashboard would get!`;
+                console.error('[Test] Error:', error);
+            }
+        }
+
+        async function verifyTask() {
+            const result = document.getElementById('verify-result');
+            result.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch(`${API_URL}/task/worker/1`);
+                const tasks = await response.json();
+                
+                result.className = 'result success';
+                result.textContent = `✓ Rajesh Kumar has ${tasks.length} tasks\n\n` +
+                    `Latest tasks:\n` +
+                    tasks.slice(0, 3).map(t => 
+                        `- ${t.title} (${t.status}) - ${t.assigned_by}`
+                    ).join('\n');
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Failed to get tasks!\n${error.message}`;
+            }
+        }
+
+        // Auto-test on load
+        window.onload = () => {
+            testBackend();
+        };
+    </script>
+</body>
+</html>

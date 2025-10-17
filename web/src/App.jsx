@@ -8,6 +8,8 @@ import Workers from './pages/Workers';
 import Roles from './pages/Roles';
 import Assignments from './pages/Assignments';
 import Analytics from './pages/Analytics';
+import Tasks from './pages/Tasks';
+import Chatbot from './components/Chatbot';
 
 const theme = createTheme({
   palette: {
@@ -32,8 +34,11 @@ function App() {
             <Route path="/workers" element={<Workers />} />
             <Route path="/roles" element={<Roles />} />
             <Route path="/assignments" element={<Assignments />} />
+            <Route path="/tasks" element={<Tasks />} />
             <Route path="/analytics" element={<Analytics />} />
           </Routes>
+          {/* AI Chatbot - Available on all pages */}
+          <Chatbot />
         </Layout>
       </Router>
     </ThemeProvider>

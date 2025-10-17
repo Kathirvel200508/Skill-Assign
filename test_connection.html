@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Task Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .error { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Task Assignment Test Tool</h1>
+    <p>Test if tasks are being created and visible to Rajesh Kumar</p>
+
+    <div class="section">
+        <h2>1. Check Backend Connection</h2>
+        <button onclick="checkBackend()">Test Backend</button>
+        <div id="backend-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Get Rajesh Kumar's Tasks</h2>
+        <button onclick="getRajeshTasks()">Get Tasks</button>
+        <div id="tasks-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Create Test Task for Rajesh</h2>
+        <button onclick="createTestTask()">Create Task</button>
+        <div id="create-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Get Notifications</h2>
+        <button onclick="getNotifications()">Get Notifications</button>
+        <div id="notif-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        const WORKER_ID = 1; // Rajesh Kumar
+
+        async function checkBackend() {
+            const result = document.getElementById('backend-result');
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                result.className = 'result success';
+                result.textContent = `✓ Backend is running!\nStatus: ${data.status}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Backend connection failed!\n${error.message}`;
+            }
+        }
+
+        async function getRajeshTasks() {
+            const result = document.getElementById('tasks-result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${API_URL}/task/worker/${WORKER_ID}`);
+                const tasks = await response.json();
+                result.className = 'result success';
+                result.textContent = `✓ Found ${tasks.length} tasks for Rajesh Kumar\n\n` +
+                    JSON.stringify(tasks, null, 2);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Failed to get tasks!\n${error.message}`;
+            }
+        }
+
+        async function createTestTask() {
+            const result = document.getElementById('create-result');
+            result.textContent = 'Creating...';
+            
+            const taskData = {
+                worker_id: WORKER_ID,
+                role_id: null,
+                title: `Test Task - ${new Date().toLocaleTimeString()}`,
+                description: 'This is a test task created from the test tool',
+                priority: 'high',
+                assigned_by: 'Test Tool'
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/task/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData)
+                });
+                
+                const task = await response.json();
+                result.className = 'result success';
+                result.textContent = `✓ Task created successfully!\n\n` +
+                    `Task ID: ${task.id}\n` +
+                    `Title: ${task.title}\n` +
+                    `Status: ${task.status}\n\n` +
+                    `Now check the mobile app!`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Failed to create task!\n${error.message}`;
+            }
+        }
+
+        async function getNotifications() {
+            const result = document.getElementById('notif-result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${API_URL}/task/worker/${WORKER_ID}/notifications`);
+                const data = await response.json();
+                result.className = 'result success';
+                result.textContent = `✓ Found ${data.count} notifications\n\n` +
+                    JSON.stringify(data.notifications, null, 2);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `✗ Failed to get notifications!\n${error.message}`;
+            }
+        }
+
+        // Auto-test on load
+        window.onload = () => {
+            checkBackend();
+        };
+    </script>
+</body>
+</html>

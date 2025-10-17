@@ -2,28 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { Card, Title, Paragraph, Chip, ActivityIndicator, Text, Badge, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import apiClient from '../api/client';
+import axios from 'axios';
+import config from '../config';
 
 export default function NotificationsScreen() {
-  const [assignments, setAssignments] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   
-  // For demo purposes, using worker ID 1. In production, this would come from authentication
+  // Rajesh Kumar's Worker ID (Worker ID 1)
+  // In production, this would come from authentication
   const workerId = 1;
 
-  const loadAssignments = async () => {
+  const loadNotifications = async () => {
     try {
-      const response = await apiClient.get('/assignment/all');
-      // Filter assignments for this worker
-      const workerAssignments = response.data.filter(
-        assignment => assignment.worker_id === workerId
+      const response = await axios.get(
+        `${config.API_BASE_URL}/task/worker/${workerId}/notifications`
       );
-      // Sort by date (newest first)
-      workerAssignments.sort((a, b) => new Date(b.assignment_date) - new Date(a.assignment_date));
-      setAssignments(workerAssignments);
+      setNotifications(response.data.notifications || []);
     } catch (error) {
-      console.error('Error loading assignments:', error);
+      console.error('Error loading notifications:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -31,12 +29,19 @@ export default function NotificationsScreen() {
   };
 
   useEffect(() => {
-    loadAssignments();
+    console.log('[MOBILE APP] NotificationsScreen loaded for Rajesh Kumar');
+    loadNotifications();
+    // Auto-refresh every 2 seconds for instant updates from supervisor
+    const interval = setInterval(() => {
+      console.log('[MOBILE APP] Checking for new notifications...');
+      loadNotifications();
+    }, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadAssignments();
+    loadNotifications();
   };
 
   const getStatusColor = (status) => {
@@ -100,86 +105,91 @@ export default function NotificationsScreen() {
       <View style={styles.header}>
         <Title style={styles.headerTitle}>Task Notifications</Title>
         <Paragraph style={styles.headerSubtitle}>
-          {assignments.length} {assignments.length === 1 ? 'assignment' : 'assignments'}
+          {notifications.length} active {notifications.length === 1 ? 'task' : 'tasks'}
         </Paragraph>
       </View>
 
-      {assignments.length === 0 ? (
+      {notifications.length === 0 ? (
         <Card style={styles.emptyCard}>
           <Card.Content style={styles.emptyContent}>
             <MaterialCommunityIcons name="bell-off-outline" size={64} color="#ccc" />
-            <Title style={styles.emptyTitle}>No Notifications</Title>
+            <Title style={styles.emptyTitle}>No Active Tasks</Title>
             <Paragraph style={styles.emptyText}>
-              You don't have any task assignments yet.
+              You don't have any pending or in-progress tasks.
             </Paragraph>
           </Card.Content>
         </Card>
       ) : (
-        assignments.map((assignment, index) => (
-          <Card key={assignment.id || index} style={styles.notificationCard}>
+        notifications.map((notification, index) => (
+          <Card key={notification.id || index} style={[
+            styles.notificationCard,
+            notification.is_new && styles.newNotificationCard
+          ]}>
             <Card.Content>
+              {notification.is_new && (
+                <Badge style={styles.newBadge} size={8} />
+              )}
               <View style={styles.cardHeader}>
                 <View style={styles.iconContainer}>
                   <MaterialCommunityIcons 
-                    name={getStatusIcon(assignment.status)} 
+                    name={getStatusIcon(notification.status)} 
                     size={24} 
-                    color={getStatusColor(assignment.status)} 
+                    color={getStatusColor(notification.status)} 
                   />
                 </View>
                 <View style={styles.headerContent}>
-                  <Title style={styles.roleTitle}>New Task Assignment</Title>
-                  <Text style={styles.dateText}>{formatDate(assignment.assignment_date)}</Text>
+                  <Title style={styles.roleTitle}>{notification.title}</Title>
+                  <Text style={styles.dateText}>{formatDate(notification.created_at)}</Text>
                 </View>
                 <Chip 
-                  style={[styles.statusChip, { backgroundColor: getStatusColor(assignment.status) }]}
+                  style={[styles.statusChip, { backgroundColor: getStatusColor(notification.status) }]}
                   textStyle={styles.statusText}
                 >
-                  {assignment.status || 'Pending'}
+                  {notification.status.replace('_', ' ')}
                 </Chip>
               </View>
 
               <Divider style={styles.divider} />
 
+              {notification.description && (
+                <Paragraph style={styles.description}>{notification.description}</Paragraph>
+              )}
+
               <View style={styles.detailsContainer}>
                 <View style={styles.detailRow}>
                   <MaterialCommunityIcons name="briefcase" size={20} color="#666" />
                   <Text style={styles.detailLabel}>Role:</Text>
-                  <Text style={styles.detailValue}>{assignment.role_name || 'Not specified'}</Text>
+                  <Text style={styles.detailValue}>{notification.role_name}</Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <MaterialCommunityIcons name="chart-line" size={20} color="#666" />
-                  <Text style={styles.detailLabel}>Fit Score:</Text>
-                  <Text style={styles.detailValue}>
-                    {assignment.fit_score ? `${(assignment.fit_score * 100).toFixed(0)}%` : 'N/A'}
+                  <MaterialCommunityIcons name="account" size={20} color="#666" />
+                  <Text style={styles.detailLabel}>Assigned by:</Text>
+                  <Text style={styles.detailValue}>{notification.assigned_by}</Text>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <MaterialCommunityIcons 
+                    name={notification.priority === 'high' ? 'alert-circle' : notification.priority === 'medium' ? 'alert' : 'information'} 
+                    size={20} 
+                    color={notification.priority === 'high' ? '#f44336' : notification.priority === 'medium' ? '#ff9800' : '#2196f3'} 
+                  />
+                  <Text style={styles.detailLabel}>Priority:</Text>
+                  <Text style={[styles.detailValue, { textTransform: 'capitalize' }]}>
+                    {notification.priority}
                   </Text>
                 </View>
 
-                {assignment.predicted_performance && (
+                {notification.due_date && (
                   <View style={styles.detailRow}>
-                    <MaterialCommunityIcons name="star" size={20} color="#666" />
-                    <Text style={styles.detailLabel}>Expected Performance:</Text>
+                    <MaterialCommunityIcons name="calendar-clock" size={20} color="#666" />
+                    <Text style={styles.detailLabel}>Due:</Text>
                     <Text style={styles.detailValue}>
-                      {(assignment.predicted_performance * 100).toFixed(0)}%
+                      {new Date(notification.due_date).toLocaleDateString()}
                     </Text>
                   </View>
                 )}
-
-                {assignment.notes && (
-                  <View style={styles.notesContainer}>
-                    <MaterialCommunityIcons name="note-text" size={20} color="#666" />
-                    <Text style={styles.notesLabel}>Notes:</Text>
-                    <Text style={styles.notesText}>{assignment.notes}</Text>
-                  </View>
-                )}
               </View>
-
-              {assignment.feedback && (
-                <View style={styles.feedbackContainer}>
-                  <Text style={styles.feedbackLabel}>Feedback:</Text>
-                  <Text style={styles.feedbackText}>{assignment.feedback}</Text>
-                </View>
-              )}
             </Card.Content>
           </Card>
         ))
@@ -236,6 +246,22 @@ const styles = StyleSheet.create({
     margin: 16,
     marginBottom: 8,
     elevation: 2,
+  },
+  newNotificationCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#6200ee',
+  },
+  newBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#f44336',
+  },
+  description: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+    lineHeight: 20,
   },
   cardHeader: {
     flexDirection: 'row',

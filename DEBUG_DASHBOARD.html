@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Supervisor Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #2196f3; margin-bottom: 20px; }
+        .panel {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 12px 24px;
+            margin: 5px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #1976d2; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #4caf50; }
+        .error { background: #ffebee; color: #c62828; border-left: 4px solid #f44336; }
+        .info { background: #e3f2fd; color: #1565c0; border-left: 4px solid #2196f3; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Supervisor Dashboard Debugger</h1>
+        <p style="color: #666; margin-bottom: 20px;">Test if the supervisor dashboard can assign tasks to Rajesh Kumar</p>
+
+        <div class="grid">
+            <div class="panel">
+                <h2>1️⃣ System Check</h2>
+                <button onclick="checkSystem()">Run System Check</button>
+                <div id="system-result" class="result"></div>
+            </div>
+
+            <div class="panel">
+                <h2>2️⃣ Get Workers</h2>
+                <button onclick="getWorkers()">Load Workers</button>
+                <div id="workers-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>3️⃣ Assign Task to Rajesh Kumar</h2>
+            
+            <label>Worker:</label>
+            <select id="worker-select">
+                <option value="">Loading workers...</option>
+            </select>
+
+            <label>Task Title: <span style="color:red">*</span></label>
+            <input type="text" id="task-title" placeholder="e.g., Repair Machine #5" />
+
+            <label>Description:</label>
+            <input type="text" id="task-desc" placeholder="Optional task description" />
+
+            <label>Priority:</label>
+            <select id="task-priority">
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+            </select>
+
+            <br><br>
+            <button onclick="assignTask()" style="background: #4caf50; font-size: 16px; padding: 15px 30px;">
+                ✅ Assign Task to Worker
+            </button>
+
+            <div id="assign-result" class="result"></div>
+        </div>
+
+        <div class="panel">
+            <h2>4️⃣ Verify Task Assigned</h2>
+            <button onclick="verifyTask()">Check Rajesh Kumar's Tasks</button>
+            <div id="verify-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let workers = [];
+
+        async function checkSystem() {
+            const result = document.getElementById('system-result');
+            result.className = 'result info';
+            result.textContent = 'Checking system...\n\n';
+
+            try {
+                // Check backend
+                result.textContent += '⏳ Checking backend...\n';
+                const healthResponse = await fetch(`${API_URL}/health`);
+                if (!healthResponse.ok) throw new Error('Backend not responding');
+                result.textContent += '✅ Backend is running!\n\n';
+
+                // Check if can reach task endpoint
+                result.textContent += '⏳ Checking task endpoints...\n';
+                const tasksResponse = await fetch(`${API_URL}/task/all`);
+                if (!tasksResponse.ok) throw new Error('Task endpoint not working');
+                const tasks = await tasksResponse.json();
+                result.textContent += `✅ Task endpoint working! (${tasks.length} total tasks)\n\n`;
+
+                // Check workers endpoint
+                result.textContent += '⏳ Checking workers endpoint...\n';
+                const workersResponse = await fetch(`${API_URL}/worker/all`);
+                if (!workersResponse.ok) throw new Error('Workers endpoint not working');
+                const workersData = await workersResponse.json();
+                result.textContent += `✅ Workers endpoint working! (${workersData.length} workers)\n\n`;
+
+                result.className = 'result success';
+                result.textContent += '🎉 ALL SYSTEMS OPERATIONAL!\n';
+                result.textContent += 'Supervisor dashboard should be able to assign tasks.';
+
+                // Auto-load workers
+                getWorkers();
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent += `\n❌ ERROR: ${error.message}\n\n`;
+                result.textContent += 'Make sure backend is running:\n';
+                result.textContent += 'cd backend\n';
+                result.textContent += 'python -m uvicorn main:app --reload';
+            }
+        }
+
+        async function getWorkers() {
+            const result = document.getElementById('workers-result');
+            const select = document.getElementById('worker-select');
+            
+            result.className = 'result info';
+            result.textContent = 'Loading workers...\n';
+
+            try {
+                const response = await fetch(`${API_URL}/worker/all`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                workers = await response.json();
+                result.className = 'result success';
+                result.textContent = `✅ Found ${workers.length} workers:\n\n`;
+
+                // Clear and populate select
+                select.innerHTML = '<option value="">-- Select a worker --</option>';
+                
+                workers.forEach(worker => {
+                    result.textContent += `👷 ${worker.name} (ID: ${worker.id})\n`;
+                    result.textContent += `   Role: ${worker.current_role || 'None'}\n`;
+                    result.textContent += `   Skills: ${worker.skills ? worker.skills.join(', ') : 'None'}\n\n`;
+                    
+                    const option = document.createElement('option');
+                    option.value = worker.id;
+                    option.textContent = `${worker.name} - ${worker.current_role || 'No role'}`;
+                    select.appendChild(option);
+                });
+
+                // Auto-select Rajesh Kumar if found
+                const rajesh = workers.find(w => w.name.includes('Rajesh'));
+                if (rajesh) {
+                    select.value = rajesh.id;
+                    result.textContent += `\n🎯 Auto-selected: ${rajesh.name}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Failed to load workers: ${error.message}`;
+            }
+        }
+
+        async function assignTask() {
+            const result = document.getElementById('assign-result');
+            const workerId = document.getElementById('worker-select').value;
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-desc').value;
+            const priority = document.getElementById('task-priority').value;
+
+            result.className = 'result info';
+            result.textContent = '';
+
+            // Validation
+            if (!workerId) {
+                result.className = 'result error';
+                result.textContent = '❌ Please select a worker!';
+                return;
+            }
+
+            if (!title) {
+                result.className = 'result error';
+                result.textContent = '❌ Please enter a task title!';
+                return;
+            }
+
+            const worker = workers.find(w => w.id == workerId);
+            result.textContent = `⏳ Assigning task to ${worker ? worker.name : 'worker'}...\n\n`;
+
+            const taskData = {
+                worker_id: parseInt(workerId),
+                role_id: null,
+                title: title,
+                description: description || '',
+                priority: priority,
+                due_date: null,
+                assigned_by: 'Debug Tool'
+            };
+
+            result.textContent += 'Task Data:\n';
+            result.textContent += JSON.stringify(taskData, null, 2) + '\n\n';
+
+            try {
+                const response = await fetch(`${API_URL}/task/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData)
+                });
+
+                result.textContent += `Response Status: ${response.status}\n\n`;
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorData}`);
+                }
+
+                const task = await response.json();
+                result.className = 'result success';
+                result.textContent += '✅✅✅ TASK ASSIGNED SUCCESSFULLY! ✅✅✅\n\n';
+                result.textContent += `Task ID: ${task.id}\n`;
+                result.textContent += `Title: ${task.title}\n`;
+                result.textContent += `Worker: ${task.worker_id} (${worker ? worker.name : 'Unknown'})\n`;
+                result.textContent += `Priority: ${task.priority}\n`;
+                result.textContent += `Status: ${task.status}\n\n`;
+                result.textContent += '🎉 Task will appear in mobile app within 2 seconds!\n\n';
+                result.textContent += 'Full Response:\n';
+                result.textContent += JSON.stringify(task, null, 2);
+
+                // Clear form
+                document.getElementById('task-title').value = '';
+                document.getElementById('task-desc').value = '';
+
+                // Auto-verify
+                setTimeout(() => verifyTask(), 1000);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent += `\n❌ FAILED TO ASSIGN TASK!\n\n`;
+                result.textContent += `Error: ${error.message}\n\n`;
+                result.textContent += 'This means the supervisor dashboard has the same problem!';
+            }
+        }
+
+        async function verifyTask() {
+            const result = document.getElementById('verify-result');
+            result.className = 'result info';
+            result.textContent = 'Checking Rajesh Kumar\'s tasks...\n\n';
+
+            try {
+                const response = await fetch(`${API_URL}/task/worker/1`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const tasks = await response.json();
+                result.className = 'result success';
+                result.textContent = `✅ Rajesh Kumar has ${tasks.length} tasks:\n\n`;
+
+                if (tasks.length === 0) {
+                    result.textContent += '(No tasks yet - assign one above!)\n';
+                } else {
+                    tasks.slice(0, 5).forEach((task, i) => {
+                        result.textContent += `${i + 1}. ${task.title}\n`;
+                        result.textContent += `   Status: ${task.status}\n`;
+                        result.textContent += `   Priority: ${task.priority}\n`;
+                        result.textContent += `   Assigned by: ${task.assigned_by}\n\n`;
+                    });
+
+                    if (tasks.length > 5) {
+                        result.textContent += `... and ${tasks.length - 5} more tasks\n`;
+                    }
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Failed: ${error.message}`;
+            }
+        }
+
+        // Auto-run system check on load
+        window.onload = () => {
+            checkSystem();
+        };
+    </script>
+</body>
+</html>

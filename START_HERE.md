@@ -1,8 +1,61 @@
-# 🎯 START HERE - Skill Assignment MVP
+# 🎯 START HERE - Skill Assignment System
 
 ## Welcome! 👋
 
-You now have a **complete, production-ready MVP** for intelligent skill-based worker assignment in smart factories.
+You now have a **complete, jury-ready system** for intelligent skill-based worker assignment with real-time task sync and health monitoring!
+
+---
+
+## 🎬 **FOR JURY PRESENTATION - START HERE!**
+
+**Time until presentation? Pick your prep time:**
+
+### ⏰ **30 Minutes Before Presentation**
+1. Read **`IMPLEMENTATION_COMPLETE.md`** - Complete summary
+2. Print **`PRESENTATION_CHEAT_SHEET.md`** - Keep visible during demo
+3. Start all servers (see "Quick Setup" below)
+4. Run `python quick_demo_setup.py` to populate data
+5. Practice demo once (3-5 minutes)
+
+### ⏰ **1 Hour Before Presentation**
+1. Read **`JURY_PRESENTATION_GUIDE.md`** - Full demo flow
+2. Read **`PRESENTATION_CHEAT_SHEET.md`** - Quick reference
+3. Review **`IMPLEMENTATION_COMPLETE.md`** - What was built
+4. Set up and test everything
+5. Practice demo 2-3 times
+
+### ⏰ **1 Day Before Presentation**
+1. Read all presentation guides
+2. Set up project completely
+3. Populate with realistic demo data
+4. Practice full presentation
+5. Prepare backup plans
+6. Review Q&A answers
+
+### 🚀 **Quick 3-Server Setup**
+
+```bash
+# Terminal 1 - Backend (Port 8000)
+cd backend
+.\run.bat
+
+# Terminal 2 - Web App (Port 3000)
+cd web
+npm run dev
+
+# Terminal 3 - Mobile App (Port 8082)
+cd mobile
+npm start
+
+# Terminal 4 - Add Demo Data
+cd backend
+python quick_demo_setup.py
+```
+
+**Verify:**
+- ✅ http://localhost:8000/docs - Backend API
+- ✅ http://localhost:3000 - Web Supervisor App
+- ✅ http://localhost:8082 - Mobile Worker App
 
 ---
 

@@ -78,6 +78,7 @@ class AssignmentCreate(BaseModel):
     worker_id: int
     role_id: int
     fit_score: float
+    task_id: Optional[int] = None
 
 class AssignmentFeedback(BaseModel):
     success: bool
@@ -91,6 +92,7 @@ class AssignmentResponse(BaseModel):
     success: Optional[bool]
     assigned_at: datetime
     completed_at: Optional[datetime]
+    task_id: Optional[int]
     
     class Config:
         from_attributes = True
@@ -149,3 +151,125 @@ class RoleDescriptionResponse(BaseModel):
     difficulty_level: float
     typical_tasks: List[str]
     success_criteria: str
+
+# Task Schemas
+class TaskCreate(BaseModel):
+    worker_id: int
+    role_id: Optional[int] = None
+    title: str
+    description: Optional[str] = None
+    priority: str = Field(default="medium", pattern="^(low|medium|high)$")
+    due_date: Optional[datetime] = None
+    assigned_by: str = "Supervisor"
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    priority: Optional[str] = None
+    status: Optional[str] = Field(None, pattern="^(pending|in_progress|completed)$")
+    due_date: Optional[datetime] = None
+
+class TaskResponse(BaseModel):
+    id: int
+    worker_id: int
+    role_id: Optional[int]
+    title: str
+    description: Optional[str]
+    priority: str
+    status: str
+    assigned_by: str
+    due_date: Optional[datetime]
+    created_at: datetime
+    updated_at: Optional[datetime]
+    completed_at: Optional[datetime]
+    
+    class Config:
+        from_attributes = True
+
+# Health Metric Schemas
+class HealthMetricCreate(BaseModel):
+    worker_id: int
+    heart_rate: Optional[int] = None
+    blood_pressure_systolic: Optional[int] = None
+    blood_pressure_diastolic: Optional[int] = None
+    oxygen_level: Optional[float] = None
+    body_temperature: Optional[float] = None
+    stress_level: Optional[float] = Field(None, ge=0, le=100)
+    fatigue_score: Optional[float] = Field(None, ge=0, le=100)
+    steps_count: int = 0
+    calories_burned: float = 0.0
+    hours_worked_today: float = 0.0
+    device_id: Optional[str] = None
+
+class HealthMetricResponse(BaseModel):
+    id: int
+    worker_id: int
+    heart_rate: Optional[int]
+    blood_pressure_systolic: Optional[int]
+    blood_pressure_diastolic: Optional[int]
+    oxygen_level: Optional[float]
+    body_temperature: Optional[float]
+    stress_level: Optional[float]
+    fatigue_score: Optional[float]
+    steps_count: int
+    calories_burned: float
+    hours_worked_today: float
+    device_id: Optional[str]
+    recorded_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class WorkerHealthSummary(BaseModel):
+    worker_id: int
+    worker_name: str
+    latest_heart_rate: Optional[int]
+    latest_oxygen_level: Optional[float]
+    latest_stress_level: Optional[float]
+    latest_fatigue_score: Optional[float]
+    hours_worked_today: float
+    hours_worked_this_week: float
+    total_steps_today: int
+    health_status: str  # "Good", "Warning", "Critical"
+    alerts: List[str]  # Health alerts
+    last_updated: datetime
+
+# Work Session Schemas
+class WorkSessionCreate(BaseModel):
+    worker_id: int
+    clock_in: datetime
+    location: Optional[str] = None
+    task_id: Optional[int] = None
+    device_id: Optional[str] = None
+
+class WorkSessionUpdate(BaseModel):
+    clock_out: Optional[datetime] = None
+    break_duration: Optional[float] = None
+    location: Optional[str] = None
+
+class WorkSessionResponse(BaseModel):
+    id: int
+    worker_id: int
+    clock_in: datetime
+    clock_out: Optional[datetime]
+    total_hours: Optional[float]
+    break_duration: float
+    location: Optional[str]
+    task_id: Optional[int]
+    recorded_by: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class WorkerHoursReport(BaseModel):
+    worker_id: int
+    worker_name: str
+    today_hours: float
+    week_hours: float
+    month_hours: float
+    overtime_hours: float
+    sessions_today: int
+    average_session_length: float
+    longest_shift: float
+    status: str  # "Normal", "Approaching Limit", "Overtime"
